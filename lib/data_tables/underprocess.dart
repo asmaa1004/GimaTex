@@ -9,6 +9,8 @@ import '../components/colors.dart';
 import '../models/customers.dart' show Data, Customers;
 import 'package:http/http.dart' as http;
 
+import '../shared/generate_pdf/generate_pdf.dart';
+
 class UnderProcess extends StatefulWidget {
   const UnderProcess({Key? key}) : super(key: key);
 
@@ -16,8 +18,21 @@ class UnderProcess extends StatefulWidget {
   State<UnderProcess> createState() => _UnderProcessState();
 }
 
-class _UnderProcessState extends State<UnderProcess> with DLL {
+class _UnderProcessState extends State<UnderProcess> {
+  DLL callApi = DLL();
   Customers? customers;
+  List<String> tableKeys = [
+    "الرسالة",
+    "امر الشغل",
+    "الخام",
+    "الغزل",
+    "اللون",
+    "الكود",
+    "وزن الخام",
+    "رصيد الجاهز"
+  ];
+  var tableData;
+  List<String>? pdfTableKey;
 
   String date = sharedPref.getString("S_LastUpdate").toString();
 
@@ -52,6 +67,31 @@ class _UnderProcessState extends State<UnderProcess> with DLL {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: GestureDetector(
+            onTap: () async {
+              await generateAndSavePDF(tableKeys.toList(), tableData.toList(), "رصيد الجاهز مفصل",pdfTableKey??[]);
+            },
+            child: Container(
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: kMainColor.withOpacity(.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "طباعة",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.save),
+                ],
+              ),
+            )),
         appBar: AppBar(
           elevation: 10.0,
           backgroundColor: kMainColor,
@@ -357,7 +397,17 @@ class _UnderProcessState extends State<UnderProcess> with DLL {
   Future<List<Product>> generateProductList() async {
     List<Product> productList = [];
     var response =
-        await postRequest("$linkServerName/UnderProcess/UnderProcess.php", {"CusCode": currentCustomer});
+        await callApi.postRequest("$linkServerName/UnderProcess/UnderProcess.php", {"CusCode": currentCustomer});
+
+    setState(() {
+      tableData = response["data"];
+    });
+    if(isOwner ==true) {
+      pdfTableKey = ["CusSNo","SerialNo","CusName","Cloth","ThNo","Color","ColorCode","RawWt","FinRawWt"];
+    } else {
+      pdfTableKey = ["CusSNo","SerialNo","Cloth","ThNo","Color","ColorCode","RawWt","FinRawWt"];
+    }
+
 
     for (var item in response["data"]) {
       Product current = Product(

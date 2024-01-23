@@ -9,6 +9,8 @@ import '../components/colors.dart';
 import '../models/customers.dart' show Data, Customers;
 import 'package:http/http.dart' as http;
 
+import '../shared/generate_pdf/generate_pdf.dart';
+
 
 class RawStoreTotal extends StatefulWidget {
   const RawStoreTotal({Key? key}) : super(key: key);
@@ -17,7 +19,12 @@ class RawStoreTotal extends StatefulWidget {
   State<RawStoreTotal> createState() => _RawStoreTotalState();
 }
 
-class _RawStoreTotalState extends State<RawStoreTotal> with DLL {
+class _RawStoreTotalState extends State<RawStoreTotal>{
+  DLL callApi = DLL();
+
+  List<String>tableKeys = ["الخام","اثواب واردة","خام وارد","الرصيد"];
+  var tableData;
+  List<String>?pdfTableKey;
 
   Customers? customers;
 
@@ -54,6 +61,30 @@ class _RawStoreTotalState extends State<RawStoreTotal> with DLL {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+
+        floatingActionButton: GestureDetector(
+            onTap: () async {
+              await generateAndSavePDF(tableKeys.toList(),tableData.toList(), "رصيد الخام مجمع",pdfTableKey??[]);
+            },
+            child: Container(
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: kMainColor.withOpacity(.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("طباعة", style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),),
+                  Icon(Icons.save),
+                ],),
+            )
+        ),
+
         appBar: AppBar(
           elevation: 10.0,
           backgroundColor: kMainColor,
@@ -311,7 +342,16 @@ class _RawStoreTotalState extends State<RawStoreTotal> with DLL {
   Future<List<Product>> generateProductList() async {
     List<Product> productList = [];
     var response =
-    await postRequest("$linkServerName/Rawstore/RawTotal.php", {"CusCode": currentCustomer});
+    await callApi.postRequest("$linkServerName/Rawstore/RawTotal.php", {"CusCode": currentCustomer});
+    setState(() {
+      tableData = response["data"];
+    });
+
+    if(isOwner ==true) {
+      pdfTableKey = ["Cloth","CusName","SRI","SRWI","SRW"];
+    } else {
+      pdfTableKey = ["Cloth","SRI","SRWI","SRW"];
+    }
 
     for (var item in response["data"]) {
       Product current = Product(

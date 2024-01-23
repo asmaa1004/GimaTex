@@ -7,8 +7,9 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 version: 1.1.0
 
+
 environment:
-  sdk: ">2.16.0 <3.0.0"
+  sdk: '>=3.2.4 <4.0.0'
 
 dependencies:
   flutter:
@@ -20,14 +21,15 @@ dependencies:
   http:
   intl:
   get:
-  path_provider:
   awesome_dialog:
   shared_preferences:
-  searchable_dropdown:
-  dropdown_search:
-  flutter_launcher_icons:
+  flutter_launcher_icons: ^0.13.1
   store_redirect:
   package_info_plus:
+  pdf: ^3.10.6
+  printing: ^5.11.1
+  open_file: ^3.3.2
+  path_provider: ^2.1.1
 
 
 dev_dependencies:
@@ -46,6 +48,15 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/fonts/
+    - assets/fonts/NotoNaskhArabic-Regular.ttf
+
+
+  fonts:
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
+          weight: 400
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

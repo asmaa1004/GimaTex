@@ -14,7 +14,8 @@ class ChangePassword extends StatefulWidget {
   State<ChangePassword> createState() => _ChangePasswordState();
 }
 
-class _ChangePasswordState extends State<ChangePassword> with DLL {
+class _ChangePasswordState extends State<ChangePassword>{
+  DLL callApi = DLL();
   GlobalKey<FormState> formState = GlobalKey();
 
   TextEditingController oldPassword =  TextEditingController();
@@ -33,7 +34,7 @@ class _ChangePasswordState extends State<ChangePassword> with DLL {
       if (formState.currentState!.validate()) {
         isLoading = true;
         setState(() {});
-        var response = await postRequest(
+        var response = await callApi.postRequest(
 
             "$linkServerName/Login/UpdatePass.php", {
           "CusCode": sharedPref.getString("S_CusCode"),

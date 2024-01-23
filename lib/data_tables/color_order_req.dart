@@ -16,7 +16,8 @@ class ColorOrderReq extends StatefulWidget {
   State<ColorOrderReq> createState() => _ColorOrderReqState();
 }
 
-class _ColorOrderReqState extends State<ColorOrderReq> with DLL {
+class _ColorOrderReqState extends State<ColorOrderReq> {
+  DLL callApi = DLL();
   GlobalKey<FormState> formState = GlobalKey();
 
   String cloth = "";
@@ -73,7 +74,7 @@ class _ColorOrderReqState extends State<ColorOrderReq> with DLL {
         isLoading = true;
         setState(() {});
         var response =
-            await postRequest("$linkServerName/ColorOrderReq/InsertData.php", {
+            await callApi.postRequest("$linkServerName/ColorOrderReq/InsertData.php", {
           "Cloth": cloth,
           "CusSNo": cusSNo.text,
           "Qty": qty.text,
@@ -104,9 +105,9 @@ class _ColorOrderReqState extends State<ColorOrderReq> with DLL {
           AwesomeDialog(
             context: context,
             // ignore: deprecated_member_use
-            dialogType: DialogType.SUCCES,
+            dialogType: DialogType.success,
             // ignore: deprecated_member_use
-            animType: AnimType.RIGHSLIDE,
+            animType: AnimType.rightSlide,
             headerAnimationLoop: true,
             title: "",
             desc: 'تم الارسال',

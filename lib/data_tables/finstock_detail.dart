@@ -9,15 +9,30 @@ import '../components/colors.dart';
 import '../models/customers.dart' show Data, Customers;
 import 'package:http/http.dart' as http;
 
+import '../shared/generate_pdf/generate_pdf.dart';
+
 class FinstockDetail extends StatefulWidget {
   const FinstockDetail({Key? key}) : super(key: key);
 
   @override
   State<FinstockDetail> createState() => _FinstockDetailState();
-
 }
 
-class _FinstockDetailState extends State<FinstockDetail> with DLL {
+class _FinstockDetailState extends State<FinstockDetail> {
+  DLL callApi = DLL();
+  List<String> tableKeys = [
+    "الرسالة",
+    "الخام",
+    "الغزل",
+    "اللون",
+    "كود اللون",
+    "رصيد الخام",
+    "البراسل",
+    "الاثواب",
+    "رصيد الجاهز"
+  ];
+  var tableData;
+  List<String>? pdfTableKey;
   Customers? customers;
 
   String date = sharedPref.getString("S_LastUpdate").toString();
@@ -29,7 +44,6 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
   bool isOwner = false;
 
   void _getCustomers() async {
-
     var response = await http.post(Uri.parse("$linkServerName/Customers.php"));
 
     setState(() {
@@ -48,10 +62,36 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
       currentCustomer = "0";
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: GestureDetector(
+            onTap: () async {
+              await generateAndSavePDF(tableKeys.toList(), tableData.toList(), "رصيد الجاهز مفصل",pdfTableKey??[]);
+            },
+            child: Container(
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: kMainColor.withOpacity(.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "طباعة",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.save),
+                ],
+              ),
+            )),
         appBar: AppBar(
           elevation: 10.0,
           backgroundColor: kMainColor,
@@ -65,7 +105,11 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
           actions: [
             Container(
               padding: const EdgeInsets.all(5),
-              child: Image.asset(imageLink,width: 50,height: 50,),
+              child: Image.asset(
+                imageLink,
+                width: 50,
+                height: 50,
+              ),
             ),
           ],
           title: const Center(
@@ -95,19 +139,17 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                         ),
                         child: Autocomplete<Data>(
                           optionsMaxHeight: 300,
-                          onSelected: (data){
+                          onSelected: (data) {
                             currentCustomer = data.cusCode;
                             FocusScope.of(context).requestFocus(FocusNode());
-                          } ,
+                          },
                           optionsBuilder: (TextEditingValue value) {
                             return customers!.data
-                                .where((element) => element.cusName
-                                .toLowerCase()
-                                .contains(value.text.toLowerCase()))
+                                .where((element) => element.cusName.toLowerCase().contains(value.text.toLowerCase()))
                                 .toList();
                           },
-                          displayStringForOption: (Data d)=>d.cusName,
-                          fieldViewBuilder: (context, controller, focsNode, onEditingComplete){
+                          displayStringForOption: (Data d) => d.cusName,
+                          fieldViewBuilder: (context, controller, focsNode, onEditingComplete) {
                             return TextField(
                               textDirection: TextDirection.rtl,
                               controller: controller,
@@ -116,16 +158,13 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(color: kMainColor)
-                                ),
+                                    borderSide: const BorderSide(color: kMainColor)),
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: const BorderSide(color: kMainColor)
-                                ),
+                                    borderSide: const BorderSide(color: kMainColor)),
                                 enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide:const BorderSide(color: kMainColor)
-                                ),
+                                    borderSide: const BorderSide(color: kMainColor)),
                                 hintText: "أختر العميل",
                                 prefixIcon: const Icon(
                                   Icons.search,
@@ -154,8 +193,7 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                       height: MediaQuery.of(context).size.height * 0.73,
                       child: FutureBuilder(
                         future: getProductDataSource(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<dynamic> snapshot) {
+                        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                           return snapshot.hasData
                               ? SfDataGridTheme(
                                   data: SfDataGridThemeData(
@@ -166,15 +204,11 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                                     columns: getColumns(snapshot),
                                     allowPullToRefresh: true,
                                     allowSorting: true,
-                                    rowHeight:
-                                    MediaQuery.of(context).size.height *
-                                              0.089,
+                                    rowHeight: MediaQuery.of(context).size.height * 0.089,
                                     selectionMode: SelectionMode.multiple,
-                                    gridLinesVisibility:
-                                    GridLinesVisibility.both,
-                                    headerGridLinesVisibility:
-                                    GridLinesVisibility.both,
-                                      ),
+                                    gridLinesVisibility: GridLinesVisibility.both,
+                                    headerGridLinesVisibility: GridLinesVisibility.both,
+                                  ),
                                 )
                               : const Center(
                                   child: CircularProgressIndicator(
@@ -197,12 +231,10 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
     return ProductDataGridSource(productList);
   }
 
+  List<GridColumn> getColumns(AsyncSnapshot<dynamic> snapshot) {
+    ProductDataGridSource dataSource = snapshot.data;
 
-  List<GridColumn> getColumns( AsyncSnapshot<dynamic> snapshot ) {
-
-    ProductDataGridSource dataSource = snapshot.data ;
-
-    if (dataSource.productList.isNotEmpty ){
+    if (dataSource.productList.isNotEmpty) {
       return <GridColumn>[
         GridColumn(
             columnName: 'CusSNo',
@@ -349,12 +381,11 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                   ),
                 ))),
       ];
-    }
-    else{
-      return<GridColumn>[
+    } else {
+      return <GridColumn>[
         GridColumn(
             columnName: '',
-            width: MediaQuery.of(context).size.width + 4 ,
+            width: MediaQuery.of(context).size.width + 4,
             label: Container(
                 padding: const EdgeInsets.only(top: 10),
                 alignment: Alignment.center,
@@ -367,18 +398,25 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
                     color: kMainColor,
                   ),
                 ))),
-      ] ;
+      ];
     }
   }
 
   Future<List<Product>> generateProductList() async {
     List<Product> productList = [];
     var response =
-        await postRequest("$linkServerName/FinishStore/FinishDetail.php", {"CusCode": currentCustomer});
+        await callApi.postRequest("$linkServerName/FinishStore/FinishDetail.php", {"CusCode": currentCustomer});
 
+    setState(() {
+      tableData = response["data"];
+    });
+    if(isOwner ==true) {
+      pdfTableKey = ["CusSNo","CusName","Cloth","ThNo","Color","ColorCode","RawWt","Scrap","RollNo","FinRawWt"];
+    } else {
+      pdfTableKey = ["CusSNo","Cloth","ThNo","Color","ColorCode","RawWt","Scrap","RollNo","FinRawWt"];
+    }
     for (var item in response["data"]) {
       Product current = Product(
-
           cusSNo: item["CusSNo"] ?? "",
           cusName: item["CusName"] ?? "",
           cloth: item["Cloth"] ?? "",
@@ -388,11 +426,7 @@ class _FinstockDetailState extends State<FinstockDetail> with DLL {
           rawWt: item["RawWt"] ?? "",
           scrap: item["Scrap"] ?? "",
           rollNo: item["RollNo"] ?? "",
-          finRawWt: item["FinRawWt"] ?? ""
-
-      );
-
-
+          finRawWt: item["FinRawWt"] ?? "");
 
       productList.add(current);
     }

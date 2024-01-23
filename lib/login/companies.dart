@@ -14,7 +14,8 @@ class Companies extends StatefulWidget {
   State<Companies> createState() => _CompaniesState();
 }
 
-class _CompaniesState extends State<Companies> with DLL{
+class _CompaniesState extends State<Companies> {
+  DLL callApi = DLL();
   GlobalKey<FormState> formState = GlobalKey();
 
 

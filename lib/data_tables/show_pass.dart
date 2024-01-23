@@ -15,7 +15,8 @@ class ShowPass extends StatefulWidget {
   State<ShowPass> createState() => _ShowPassState();
 }
 
-class _ShowPassState extends State<ShowPass> with DLL {
+class _ShowPassState extends State<ShowPass> {
+  DLL callApi = DLL();
   GlobalKey<FormState> formState = GlobalKey();
   TextEditingController code =  TextEditingController();
   bool isLoading = false;
@@ -26,14 +27,14 @@ class _ShowPassState extends State<ShowPass> with DLL {
       if (formState.currentState!.validate()) {
         isLoading = true;
         setState(() {});
-        var response = await postRequest("$linkServerName/Login/ShowPass.php", {"CusCode": code.text});
+        var response = await callApi.postRequest("$linkServerName/Login/ShowPass.php", {"CusCode": code.text});
         isLoading = false;
         setState(() {});
         if (response['status'] == "success") {
           AwesomeDialog(
             context: context,
-            dialogType: DialogType.SUCCES,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.success,
+            animType: AnimType.rightSlide,
             headerAnimationLoop: true,
             title: "الرقم السري للعميل",
             desc: response["data"][0]["CusPass"].toString(),
@@ -57,8 +58,8 @@ class _ShowPassState extends State<ShowPass> with DLL {
         else {
           AwesomeDialog(
             context: context,
-            dialogType: DialogType.ERROR,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
             headerAnimationLoop: true,
             title: 'خطأ',
             desc:
@@ -72,8 +73,8 @@ class _ShowPassState extends State<ShowPass> with DLL {
     } catch (e) {
       AwesomeDialog(
         context: context,
-        dialogType: DialogType.ERROR,
-        animType: AnimType.RIGHSLIDE,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
         headerAnimationLoop: true,
         title: 'خطأ',
         desc:

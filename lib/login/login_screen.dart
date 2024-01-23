@@ -18,7 +18,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with DLL{
+class _LoginScreenState extends State<LoginScreen>{
+  DLL callApi = DLL();
   GlobalKey<FormState> formState = GlobalKey();
 
   TextEditingController code =  TextEditingController();
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
       if (formState.currentState!.validate()) {
         isLoading = true;
         setState(() {});
-        var response = await postRequest(
+        var response = await callApi.postRequest(
 
             "$linkServerName/Login/Login.php", {
               "CusCode": code.text,
@@ -61,8 +62,8 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
         } else {
           AwesomeDialog(
             context: context,
-            dialogType: DialogType.ERROR,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.error,
+            animType: AnimType.rightSlide,
             headerAnimationLoop: true,
             title: 'خطأ',
             desc:
@@ -76,8 +77,8 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
     } catch (e) {
       AwesomeDialog(
         context: context,
-        dialogType: DialogType.ERROR,
-        animType: AnimType.RIGHSLIDE,
+        dialogType: DialogType.error,
+        animType: AnimType.rightSlide,
         headerAnimationLoop: true,
         title: 'خطأ',
         desc:
@@ -106,8 +107,8 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
       if(APIManger.appVersion != APIManger.AppCurrentVerison ){
         AwesomeDialog(
             context: context,
-            dialogType: DialogType.WARNING,
-            animType: AnimType.RIGHSLIDE,
+            dialogType: DialogType.warning,
+            animType: AnimType.rightSlide,
             headerAnimationLoop: true,
             title: 'تحذير',
             desc:
@@ -145,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
                 ),
               );
             },
-            icon: const Icon(Icons.double_arrow_outlined)),
+            icon: const Icon(Icons.double_arrow_outlined,color: Colors.white,)),
         actions: [
           Container(
             padding: const EdgeInsets.all(5),
@@ -158,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> with DLL{
               title,
               style: const TextStyle(
                 fontSize: 16.0,
+                color: Colors.white
               ),
             ),
         ),

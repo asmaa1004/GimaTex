@@ -9,6 +9,8 @@ import '../components/colors.dart';
 import '../models/customers.dart' show Data, Customers;
 import 'package:http/http.dart' as http;
 
+import '../shared/generate_pdf/generate_pdf.dart';
+
 class ColorCoding extends StatefulWidget {
   const ColorCoding({Key? key}) : super(key: key);
 
@@ -16,8 +18,20 @@ class ColorCoding extends StatefulWidget {
   State<ColorCoding> createState() => _ColorCodingState();
 }
 
-class _ColorCodingState extends State<ColorCoding> with DLL {
+class _ColorCodingState extends State<ColorCoding> {
+
+  DLL callApi = DLL();
   Customers? customers;
+
+  List<String> tableKeys = [
+    "اللون",
+    "كود اللون",
+    "الخامه",
+
+
+  ];
+  var tableData;
+  List<String>? pdfTableKey;
 
   String date = sharedPref.getString("S_LastUpdate").toString();
 
@@ -52,6 +66,31 @@ class _ColorCodingState extends State<ColorCoding> with DLL {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: GestureDetector(
+            onTap: () async {
+              await generateAndSavePDF(tableKeys.toList(), tableData.toList(), "كارتله الالوان",pdfTableKey??[]);
+            },
+            child: Container(
+              width: 100,
+              height: 50,
+              decoration: BoxDecoration(
+                color: kMainColor.withOpacity(.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "طباعة",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.save),
+                ],
+              ),
+            )),
         appBar: AppBar(
           elevation: 10.0,
           backgroundColor: kMainColor,
@@ -305,7 +344,17 @@ class _ColorCodingState extends State<ColorCoding> with DLL {
   Future<List<Product>> generateProductList() async {
     List<Product> productList = [];
     var response =
-    await postRequest("$linkServerName/ColorCoding/ColorCoding.php", {"CusCode": currentCustomer});
+    await callApi.postRequest("$linkServerName/ColorCoding/ColorCoding.php", {"CusCode": currentCustomer});
+
+    setState(() {
+      tableData = response["data"];
+    });
+    if(isOwner ==true) {
+      pdfTableKey = ["ColorName","ColorCode","Cloth","CusName"];
+    } else {
+      pdfTableKey = ["ColorName","ColorCode","Cloth"];
+    }
+
 
     for (var item in response["data"]) {
       Product current = Product(
