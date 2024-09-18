@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 
 import '../shared/generate_pdf/generate_pdf.dart';
 
-
 class RawstoreDetail extends StatefulWidget {
   const RawstoreDetail({Key? key}) : super(key: key);
 
@@ -22,9 +21,19 @@ class RawstoreDetail extends StatefulWidget {
 class _RawstoreDetailState extends State<RawstoreDetail> {
   DLL callApi = DLL();
 
-  List<String>tableKeys = ["الرسالة","تاريخ التوريد","الخام","الغزل","اليوصة","مورد الخام","أثواب واردة","الكمية الواردة","الرصيد"];
+  List<String> tableKeys = [
+    "الرسالة",
+    "تاريخ التوريد",
+    "الخام",
+    "الغزل",
+    "اليوصة",
+    "مورد الخام",
+    "أثواب واردة",
+    "الكمية الواردة",
+    "الرصيد"
+  ];
   var tableData;
-  List<String>?pdfTableKey;
+  List<String>? pdfTableKey;
   Customers? customers;
 
   String date = sharedPref.getString("S_LastUpdate").toString();
@@ -36,7 +45,6 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
   bool isOwner = false;
 
   void _getCustomers() async {
-
     var response = await http.post(Uri.parse("$linkServerName/Customers.php"));
 
     setState(() {
@@ -62,7 +70,8 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
       child: Scaffold(
         floatingActionButton: GestureDetector(
             onTap: () async {
-              await generateAndSavePDF(tableKeys.toList(),tableData.toList(), "رصيد الخام مفصل",pdfTableKey??[]);
+              await generateAndSavePDF(tableKeys.toList(), tableData.toList(),
+                  "رصيد الخام مفصل", pdfTableKey ?? []);
             },
             child: Container(
               width: 100,
@@ -74,14 +83,17 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("طباعة", style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                  ),),
+                  Text(
+                    "طباعة",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Icon(Icons.save),
-                ],),
-            )
-        ),
+                ],
+              ),
+            )),
         appBar: AppBar(
           elevation: 10.0,
           backgroundColor: kMainColor,
@@ -95,7 +107,11 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
           actions: [
             Container(
               padding: const EdgeInsets.all(5),
-              child: Image.asset(imageLink,width: 50,height: 50,),
+              child: Image.asset(
+                imageLink,
+                width: 50,
+                height: 50,
+              ),
             ),
           ],
           title: const Center(
@@ -107,124 +123,124 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
         ),
         body: isLoading == true
             ? const Center(
-          child: CircularProgressIndicator(
-            color: kMainColor,
-          ),
-        )
+                child: CircularProgressIndicator(
+                  color: kMainColor,
+                ),
+              )
             : SingleChildScrollView(
-          child: Column(
-            children: [
-              Visibility(
-                visible: isOwner,
-                child: Container(
-                  margin: const EdgeInsets.all(10),
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: kMainColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Autocomplete<Data>(
-                    optionsMaxHeight: 300,
-                    onSelected: (data){
-                      currentCustomer = data.cusCode;
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    } ,
-                    optionsBuilder: (TextEditingValue value) {
-                      return customers!.data
-                          .where((element) => element.cusName
-                          .toLowerCase()
-                          .contains(value.text.toLowerCase()))
-                          .toList();
-                    },
-                    displayStringForOption: (Data d)=>d.cusName,
-                    fieldViewBuilder: (context, controller, focsNode, onEditingComplete){
-                      return TextField(
-                        textDirection: TextDirection.rtl,
-                        controller: controller,
-                        focusNode: focsNode,
-                        onEditingComplete: onEditingComplete,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: kMainColor)
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: kMainColor)
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide:const BorderSide(color: kMainColor)
-                          ),
-                          hintText: "أختر العميل",
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: kMainColor,
-                          ),
+                child: Column(
+                  children: [
+                    Visibility(
+                      visible: isOwner,
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: kMainColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(5),
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.all(5),
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Center(
-                  child: Text(
-                    sharedPref.getString("S_LastUpdate").toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                        child: Autocomplete<Data>(
+                          optionsMaxHeight: 300,
+                          onSelected: (data) {
+                            currentCustomer = data.cusCode;
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
+                          optionsBuilder: (TextEditingValue value) {
+                            return customers!.data
+                                .where((element) => element.cusName
+                                    .toLowerCase()
+                                    .contains(value.text.toLowerCase()))
+                                .toList();
+                          },
+                          displayStringForOption: (Data d) => d.cusName,
+                          fieldViewBuilder: (context, controller, focsNode,
+                              onEditingComplete) {
+                            return TextField(
+                              textDirection: TextDirection.rtl,
+                              controller: controller,
+                              focusNode: focsNode,
+                              onEditingComplete: onEditingComplete,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                        const BorderSide(color: kMainColor)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                        const BorderSide(color: kMainColor)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                        const BorderSide(color: kMainColor)),
+                                hintText: "أختر العميل",
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  color: kMainColor,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.73,
-                child: FutureBuilder(
-                  future: getProductDataSource(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<dynamic> snapshot) {
-                    return snapshot.hasData
-                        ? SfDataGridTheme(
-                      data: SfDataGridThemeData(
-                        headerColor: const Color(0xff7B89CA),
-                        selectionColor: Colors.grey,
-                      ),
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: SfDataGrid(
-                          source: snapshot.data,
-                          columns: getColumns(snapshot),
-                          allowPullToRefresh: true,
-                          allowSorting: true,
-                          rowHeight:
-                          MediaQuery.of(context).size.height *
-                              0.089,
-                          selectionMode: SelectionMode.multiple,
-                          gridLinesVisibility:
-                          GridLinesVisibility.both,
-                          headerGridLinesVisibility:
-                          GridLinesVisibility.both,
+                    Container(
+                      margin: const EdgeInsets.all(5),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Center(
+                        child: Text(
+                          sharedPref.getString("S_LastUpdate").toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    )
-                        : const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 4,
-                        color: kMainColor,
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.73,
+                      child: FutureBuilder(
+                        future: getProductDataSource(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<dynamic> snapshot) {
+                          return snapshot.hasData
+                              ? SfDataGridTheme(
+                                  data: SfDataGridThemeData(
+                                    headerColor: const Color(0xff7B89CA),
+                                    selectionColor: Colors.grey,
+                                  ),
+                                  child: Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: SfDataGrid(
+                                      source: snapshot.data,
+                                      columns: getColumns(snapshot),
+                                      allowPullToRefresh: true,
+                                      allowSorting: true,
+                                      rowHeight:
+                                          MediaQuery.of(context).size.height *
+                                              0.089,
+                                      selectionMode: SelectionMode.multiple,
+                                      gridLinesVisibility:
+                                          GridLinesVisibility.both,
+                                      headerGridLinesVisibility:
+                                          GridLinesVisibility.both,
+                                    ),
+                                  ),
+                                )
+                              : const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 4,
+                                    color: kMainColor,
+                                  ),
+                                );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
-
   }
 
   Future<ProductDataGridSource> getProductDataSource() async {
@@ -232,11 +248,10 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
     return ProductDataGridSource(productList);
   }
 
-  List<GridColumn> getColumns( AsyncSnapshot<dynamic> snapshot ) {
+  List<GridColumn> getColumns(AsyncSnapshot<dynamic> snapshot) {
+    ProductDataGridSource dataSource = snapshot.data;
 
-    ProductDataGridSource dataSource = snapshot.data ;
-
-    if (dataSource.productList.isNotEmpty ){
+    if (dataSource.productList.isNotEmpty) {
       return <GridColumn>[
         GridColumn(
             columnName: 'CusSNo',
@@ -386,12 +401,11 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
                   ),
                 ))),
       ];
-    }
-    else{
-      return<GridColumn>[
+    } else {
+      return <GridColumn>[
         GridColumn(
             columnName: '',
-            width: MediaQuery.of(context).size.width + 4 ,
+            width: MediaQuery.of(context).size.width + 4,
             label: Container(
                 padding: const EdgeInsets.only(top: 10),
                 alignment: Alignment.center,
@@ -404,31 +418,46 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
                     color: kMainColor,
                   ),
                 ))),
-      ] ;
+      ];
     }
-
-
   }
 
   Future<List<Product>> generateProductList() async {
     List<Product> productList = [];
-    var response =
-    await callApi.postRequest("$linkServerName/Rawstore/RawDetail.php", {"CusCode": currentCustomer});
+    var response = await callApi.postRequest(
+        "$linkServerName/Rawstore/RawDetail.php", {"CusCode": currentCustomer});
     setState(() {
       tableData = response["data"];
     });
 
-
-    if(isOwner ==true) {
-      pdfTableKey = ["CusSNo","DateInOut","CusName","Cloth","ThNo","InchNo","RawSupp","RollIncome","RawWt"];
+    if (isOwner == true) {
+      pdfTableKey = [
+        "CusSNo",
+        "DateInOut",
+        "CusName",
+        "Cloth",
+        "ThNo",
+        "InchNo",
+        "RawSupp",
+        "RollIncome",
+        "RawWt"
+      ];
     } else {
-      pdfTableKey = ["CusSNo","DateInOut","Cloth","ThNo","InchNo","RawSupp","RollIncome","RawWt"];
+      pdfTableKey = [
+        "CusSNo",
+        "DateInOut",
+        "Cloth",
+        "ThNo",
+        "InchNo",
+        "RawSupp",
+        "RollIncome",
+        "RawWt"
+      ];
     }
-
 
     for (var item in response["data"]) {
       Product current = Product(
-          cusSNo:  item['CusSNo'] ,
+          cusSNo: item['CusSNo'],
           dateInOut: item['DateInOut'] ?? "              ",
           cusName: item['CusName'] ?? "",
           cloth: item['Cloth'] ?? "",
@@ -437,8 +466,7 @@ class _RawstoreDetailState extends State<RawstoreDetail> {
           rawSupp: item['RawSupp'] ?? "",
           rollIncome: item['RollIncome'] ?? "",
           rawIncome: item['RawIncome'] ?? "",
-          rawWt: int.parse(item['RawWt'].toString())
-      );
+          rawWt: int.parse(item['RawWt'].toString()));
       productList.add(current);
     }
     return productList;
@@ -469,7 +497,7 @@ class ProductDataGridSource extends DataGridSource {
         alignment: Alignment.center,
         padding: const EdgeInsets.all(4.0),
         child: Text(
-          row.getCells()[1].value.substring(0,11),
+          row.getCells()[1].value.substring(0, 11),
           overflow: TextOverflow.visible,
           textDirection: TextDirection.rtl,
           style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -559,15 +587,19 @@ class ProductDataGridSource extends DataGridSource {
     dataGridRows = productList.map<DataGridRow>((dataGridRow) {
       return DataGridRow(cells: [
         DataGridCell<String>(columnName: 'CusSNo', value: dataGridRow.cusSNo),
-        DataGridCell<String>(columnName: 'DateInOut', value: dataGridRow.dateInOut),
+        DataGridCell<String>(
+            columnName: 'DateInOut', value: dataGridRow.dateInOut),
         DataGridCell<String>(columnName: 'CusName', value: dataGridRow.cusName),
         DataGridCell<String>(columnName: 'Cloth', value: dataGridRow.cloth),
         DataGridCell<String>(columnName: 'ThNo', value: dataGridRow.thNo),
         DataGridCell<String>(columnName: 'InchNo', value: dataGridRow.inchNo),
         DataGridCell<String>(columnName: 'RawSupp', value: dataGridRow.rawSupp),
-        DataGridCell<String>(columnName: 'RollIncome', value: dataGridRow.rollIncome),
-        DataGridCell<String>(columnName: 'RawIncome', value: dataGridRow.rawIncome),
-        DataGridCell<String>(columnName: 'RawWt', value: dataGridRow.rawWt.toString()),
+        DataGridCell<String>(
+            columnName: 'RollIncome', value: dataGridRow.rollIncome),
+        DataGridCell<String>(
+            columnName: 'RawIncome', value: dataGridRow.rawIncome),
+        DataGridCell<String>(
+            columnName: 'RawWt', value: dataGridRow.rawWt.toString()),
       ]);
     }).toList(growable: false);
   }

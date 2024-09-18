@@ -277,7 +277,7 @@ class _ChangePasswordState extends State<ChangePassword>{
                         child: TextButton(
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.all(5.0),
-                            primary: Colors.white,
+                            // primary: Colors.white,
                             backgroundColor: kMainColor,
                             textStyle: const TextStyle(
                               fontSize: 20,

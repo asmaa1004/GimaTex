@@ -171,7 +171,7 @@ class _ShowPassState extends State<ShowPass> {
                         child: TextButton(
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.all(5.0),
-                            primary: Colors.white,
+                            foregroundColor:Colors.white,
                             backgroundColor: kMainColor,
                             textStyle: const TextStyle(
                               fontSize: 20,
